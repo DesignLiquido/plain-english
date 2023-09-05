@@ -1,0 +1,9 @@
+{
+    "name": "@designliquido/simple-english",
+    "version": "0.0.0",
+    "description": "Our implementation of Simple English, programming language created by Gerry Rzeppa.",
+    "main": "index.js",
+    "dependencies": {
+        "typescript": "^5.2.2"
+    }
+}

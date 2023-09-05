@@ -1,2 +1,2 @@
-# simple-english
-Our implementation of Simple English, programming language created by Gerry Rzeppa.
+# plain-english
+Our implementation of Plain English, programming language created by Gerry Rzeppa.

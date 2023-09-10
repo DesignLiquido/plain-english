@@ -1,3 +1,7 @@
 export default {
-
+    COMMA: "COMMA",
+    FORWARDSLASH: "FORWARDSLASH",
+    NUMBER: "NUMBER",
+    PERIOD: "PERIOD",
+    SEMICOLON: "SEMICOLON"
 }

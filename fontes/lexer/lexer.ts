@@ -1,3 +1,4 @@
+import reservedWords from "../reserved-words";
 import { Token } from "../token";
 import tokenTypes from "../token-types";
 import { LexerError } from "./lexer-error";
@@ -54,6 +55,17 @@ export class Lexer {
     private addToken(_type: string, literal: any = null) {
         const text: string = this.code[this.line].substring(this.tokenStart, this.actual);
         this.tokens.push(new Token(_type, literal || text, literal, this.line + 1));
+    }
+
+    private identifyKeyword(): void {
+        while (this.isAlphabetOrDigit(this.code[this.line][this.actual])) {
+            this.next();
+        }
+
+        const keyword: string = this.code[this.line].substring(this.tokenStart, this.actual).toUpperCase();
+        const _type: string = keyword in reservedWords ? reservedWords[keyword] : tokenTypes.IDENTIFIER;
+
+        this.addToken(_type);
     }
 
     private next(): void {
@@ -113,12 +125,14 @@ export class Lexer {
             default:
                 if (this.isBase10Digit(char)) {
                     this.parseBase10Number();
+                } else if (this.isAlphabetCharacter(char)) { 
+                    this.identifyKeyword();
                 }
                 else {
                     this.errors.push({
                         line: this.line + 1,
                         char: char,
-                        message: 'Caractere inesperado.',
+                        message: 'Unexpected character.',
                     } as LexerError);
                     this.next();
                 }

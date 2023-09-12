@@ -150,6 +150,9 @@ export class Lexer {
             this.resolveActualCharacter();
         }
 
-        return this.tokens;
+        return { 
+            tokens: this.tokens,
+            errors: this.errors
+        };
     }
 }

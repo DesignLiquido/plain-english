@@ -18,6 +18,40 @@ export class Parser {
         this.actual = 0;
     }
 
+    private checkActualTokenType(_type: string) {
+        if (this.actual >= this.tokens.length) return false;
+        return this.tokens[this.actual]._type === _type;
+    }
+
+    private consume(_type: string, errorMessage: string) {
+        if (this.checkActualTokenType(_type)) return this.nextAndReturnPrevious();
+        throw this.error(this.tokens[this.actual], errorMessage);
+    }
+
+    private error(token: Token, errorMessage: string): ParserError {
+        const _exception = new ParserError(token, errorMessage);
+        this.errors.push(_exception);
+        return _exception;
+    }
+
+    /**
+     * Checks whether the actual token has the type equal to any of the arguments.
+     * If yes, advances the token counter.
+     * @param args All the possible types.
+     * @returns True if token is equal to one of the types; false otherwise.
+     */
+    private match(...args: string[]) {
+        for (let i = 0; i < args.length; i++) { 
+            const tipoAtual = args[i];
+            if (this.checkActualTokenType(tipoAtual)) {
+                this.nextAndReturnPrevious();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private nextAndReturnPrevious() {
         if (this.actual < this.tokens.length) this.actual += 1;
         return this.tokens[this.actual - 1];
@@ -30,7 +64,19 @@ export class Parser {
 
     private axiomStatement(): Axiom {
         const axiomToken = this.nextAndReturnPrevious();
-        return new Axiom(axiomToken.line);
+
+        const definitionToken = this.consume(tokenTypes.IDENTIFIER, `Expected an identifier for concept definition.`);
+        this.consume(tokenTypes.IS, `Expected "is" keyword after identifier for concept definition.`)
+        this.consume(tokenTypes.INDEFINITE_ARTICLE, `Expected an indefinite article after "is" for concept definition.`);
+
+        const axiomDefinedByToken = this.consume(tokenTypes.IDENTIFIER, `Expected a second identifier after the second indefinite article for concept definition.`);
+        this.consume(tokenTypes.PERIOD, `Expected period to end a concept definition.`);
+
+        return new Axiom(
+            axiomToken.line,
+            definitionToken,
+            axiomDefinedByToken
+        );
     }
 
     private convertStatement(): Convert {

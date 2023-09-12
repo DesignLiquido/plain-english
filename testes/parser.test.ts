@@ -15,9 +15,8 @@ describe('Parser', () => {
             const lexerResult = lexer.tokenize(["An amount is a number."]);
             const result = parser.parse(lexerResult.tokens);
             
-            expect(lexerResult).toBeTruthy();
-            expect(lexerResult.errors).toHaveLength(0);
-            expect(lexerResult.tokens).toHaveLength(6);
+            expect(result).toBeTruthy();
+            expect(result).toHaveLength(1);
         });
     });
 });

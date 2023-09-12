@@ -62,7 +62,7 @@ export class Lexer {
             this.next();
         }
 
-        const keyword: string = this.code[this.line].substring(this.tokenStart, this.actual).toUpperCase();
+        const keyword: string = this.code[this.line].substring(this.tokenStart, this.actual).toLowerCase();
         const _type: string = keyword in reservedWords ? reservedWords[keyword] : tokenTypes.IDENTIFIER;
 
         this.addToken(_type);
@@ -94,7 +94,7 @@ export class Lexer {
         this.addToken(tokenTypes.NUMBER, parseFloat(numeroCompleto));
     }
 
-    resolveActualCharacter() {
+    private resolveActualCharacter() {
         const char = this.code[this.line][this.actual];
 
         switch (char) {

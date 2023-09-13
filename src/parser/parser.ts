@@ -1,7 +1,10 @@
+import { Construct } from "../constructs/construct";
+import { Literal } from "../constructs/literal";
 import { Assign } from "../statements/assign";
 import { Axiom } from "../statements/axiom";
 import { Convert } from "../statements/convert";
 import { Statement } from "../statements/statement";
+import { Write } from "../statements/write";
 import { Token } from "../token";
 import tokenTypes from "../token-types";
 import { ParserError } from "./parser-error";
@@ -84,6 +87,26 @@ export class Parser {
         return new Convert(convertToken.line);
     }
 
+    private writeStatement(): Write {
+        const writeToken = this.nextAndReturnPrevious();
+
+        let argumentConstruct: Construct;
+        switch (this.tokens[this.actual]._type) {
+            case tokenTypes.TEXT:
+                const identifierOrLiteralToken = this.nextAndReturnPrevious();
+                argumentConstruct = new Literal(identifierOrLiteralToken);
+                break;
+            default:
+                throw this.error(this.tokens[this.actual], `Expected a text literal after "Write" keyword.`);
+        }
+
+        this.consume(tokenTypes.PERIOD, `Expected period to end a write command.`);
+        return new Write(
+            writeToken.line, [
+                argumentConstruct
+            ]);
+    }
+
     private resolveStatement(): any {
         switch (this.tokens[this.actual]._type) {
             case tokenTypes.ASSIGN:
@@ -93,6 +116,7 @@ export class Parser {
             case tokenTypes.INDEFINITE_ARTICLE:
                 return this.axiomStatement();
             case tokenTypes.WRITE:
+                return this.writeStatement();
             default:
                 this.nextAndReturnPrevious();
                 break;

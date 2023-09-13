@@ -9,5 +9,6 @@ export default {
     NUMBER: "NUMBER",
     PERIOD: "PERIOD",
     SEMICOLON: "SEMICOLON",
+    TEXT: "TEXT",
     WRITE: "WRITE"
 }

@@ -94,6 +94,24 @@ export class Lexer {
         this.addToken(tokenTypes.NUMBER, parseFloat(numeroCompleto));
     }
 
+    private parseText(delimiter = '"'): void {
+        while (this.code[this.line][this.actual] !== delimiter && !this.isEndOfCode()) {
+            this.next();
+        }
+
+        if (this.isEndOfCode()) {
+            this.errors.push({
+                line: this.line + 1,
+                char: this.code[this.line][this.actual - 1],
+                message: 'Unfinalized text.',
+            } as LexerError);
+            return;
+        }
+
+        const value = this.code[this.line].substring(this.tokenStart + 1, this.actual);
+        this.addToken(tokenTypes.TEXT, value);
+    }
+
     private resolveActualCharacter() {
         const char = this.code[this.line][this.actual];
 
@@ -112,6 +130,11 @@ export class Lexer {
                 break;
             case '/':
                 this.addToken(tokenTypes.FORWARDSLASH);
+                this.next();
+                break;
+            case '"':
+                this.next();
+                this.parseText('"');
                 this.next();
                 break;
             // Ignored tokens

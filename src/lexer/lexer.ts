@@ -94,6 +94,17 @@ export class Lexer {
         this.addToken(tokenTypes.NUMBER, parseFloat(numeroCompleto));
     }
 
+    private parseHex(): void {
+        this.next();
+        while (this.isBase16Digit(this.code[this.line][this.actual])) {
+            this.next();
+        }
+
+        const hexLiteral = this.code[this.line].substring(this.tokenStart + 1, this.actual);
+
+        this.addToken(tokenTypes.HEX, parseFloat(hexLiteral));
+    }
+
     private parseText(delimiter = '"'): void {
         while (this.code[this.line][this.actual] !== delimiter && !this.isEndOfCode()) {
             this.next();
@@ -131,6 +142,9 @@ export class Lexer {
             case '/':
                 this.addToken(tokenTypes.FORWARDSLASH);
                 this.next();
+                break;
+            case '$':
+                this.parseHex();
                 break;
             case '"':
                 this.next();

@@ -140,7 +140,7 @@ export class Lexer {
                 this.next();
                 break;
             case '/':
-                this.addToken(tokenTypes.FORWARDSLASH);
+                this.addToken(tokenTypes.FORWARD_SLASH);
                 this.next();
                 break;
             case '$':

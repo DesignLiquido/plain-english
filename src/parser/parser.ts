@@ -1,4 +1,5 @@
 import { Construct } from "../constructs/construct";
+import { ContextReference } from "../constructs/context-reference";
 import { Literal } from "../constructs/literal";
 import { Assign } from "../statements/assign";
 import { Axiom } from "../statements/axiom";
@@ -60,9 +61,56 @@ export class Parser {
         return this.tokens[this.actual - 1];
     }
 
+    private contextReferenceWithQualifier(operation: string, referenceTargetToken: Token, targetToken: Token) {
+        switch (this.tokens[this.actual].lexeme.toLowerCase()) {
+            case 'decimal':
+            case 'hexadecimal':
+                const tipoQualificador = this.nextAndReturnPrevious();
+                return new ContextReference(
+                    targetToken.line, 
+                    referenceTargetToken,
+                    targetToken,
+                    tipoQualificador
+                );
+            default:
+                throw this.error(this.tokens[this.actual], `Invalid data type for ${operation} target: ${this.tokens[this.actual].lexeme}.`);
+        }
+    }
+
+    private assignThroughLiteral(startToken: Token) {
+        const identifierOrLiteral = this.nextAndReturnPrevious();
+        const value = new Literal(identifierOrLiteral);
+
+        this.consume(tokenTypes.TO, "Expected a 'to' keyword after literal or identifier in 'Assign' statement.");
+        const assignReferenceTarget = this.consume(tokenTypes.INDEFINITE_ARTICLE, 
+            "Expected an article after keyword 'to' in 'Assign' statement.");
+
+        const assignTargetToken = this.nextAndReturnPrevious();
+        let assignTarget;
+        if (this.tokens[this.actual]._type === tokenTypes.IDENTIFIER) {
+            assignTarget = this.contextReferenceWithQualifier("Assign", assignReferenceTarget, assignTargetToken);
+        } else {
+            assignTarget = new ContextReference(assignTargetToken.line, assignReferenceTarget, assignTargetToken);
+        }
+
+        this.consume(tokenTypes.PERIOD, "Expected period to finalize 'Assign' expression.");
+
+        return new Assign(
+            startToken.line,
+            value,
+            assignTarget
+        )
+    }
+
     private assignStatement(): any {
         const assignToken = this.nextAndReturnPrevious();
-        return new Assign(assignToken.line);
+
+        switch (this.tokens[this.actual]._type) {
+            case tokenTypes.HEX:
+            case tokenTypes.NUMBER:
+            case tokenTypes.TEXT:
+                return this.assignThroughLiteral(assignToken);
+        }
     }
 
     private axiomStatement(): Axiom {
@@ -95,6 +143,21 @@ export class Parser {
             case tokenTypes.TEXT:
                 const identifierOrLiteralToken = this.nextAndReturnPrevious();
                 argumentConstruct = new Literal(identifierOrLiteralToken);
+                break;
+            case tokenTypes.DEFINITE_ARTICLE:
+                const conceptReference = this.nextAndReturnPrevious();
+                const concept = this.nextAndReturnPrevious();
+
+                if (this.match(tokenTypes.IDENTIFIER)) {
+                    argumentConstruct = this.contextReferenceWithQualifier("Cast", conceptReference, concept);
+                } else {
+                    argumentConstruct = new ContextReference(
+                        writeToken.line,
+                        conceptReference,
+                        concept
+                    );
+                }
+
                 break;
             default:
                 throw this.error(this.tokens[this.actual], `Expected a text literal after "Write" keyword.`);

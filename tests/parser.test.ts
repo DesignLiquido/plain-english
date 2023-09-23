@@ -26,5 +26,17 @@ describe('Parser', () => {
             expect(result).toBeTruthy();
             expect(result).toHaveLength(1);
         });
+
+        it('"Assign "123" to a string. Write the string."', () => {
+            const lexerResult = lexer.tokenize([
+                'Assign "123" to a string.',
+                'Write the string.'
+            ]);
+
+            const result = parser.parse(lexerResult.tokens);
+            
+            expect(result).toBeTruthy();
+            expect(result).toHaveLength(2);
+        });
     });
 });

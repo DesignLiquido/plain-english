@@ -110,6 +110,34 @@ export class Parser {
             case tokenTypes.NUMBER:
             case tokenTypes.TEXT:
                 return this.assignThroughLiteral(assignToken);
+            case tokenTypes.DEFINITE_ARTICLE:
+                const conceptReference = this.nextAndReturnPrevious();
+                const concept = this.nextAndReturnPrevious();
+                const value = new ContextReference(
+                    assignToken.line,
+                    conceptReference,
+                    concept
+                );
+
+                this.consume(tokenTypes.TO, `Expected keyword "to" after literal or identifier in "Assign" statement.`);
+                if (!this.match(tokenTypes.DEFINITE_ARTICLE, tokenTypes.INDEFINITE_ARTICLE)) {
+                    throw this.error(this.tokens[this.actual], `Expected an article after keyword "to" in "Assign" statement.`);
+                }
+
+                const secondConceptReference = this.nextAndReturnPrevious();
+                const secondConcept = new ContextReference(
+                    secondConceptReference.line,
+                    secondConceptReference,
+                    secondConceptReference
+                );
+
+                this.consume(tokenTypes.PERIOD, `Expected period to finalize "Assign" statement.`);
+
+                return new Assign(
+                    assignToken.line,
+                    value,
+                    secondConcept
+                );
         }
     }
 

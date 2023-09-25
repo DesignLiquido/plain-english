@@ -38,5 +38,17 @@ describe('Parser', () => {
             expect(result).toBeTruthy();
             expect(result).toHaveLength(2);
         });
+
+        it('"Assign 1 to a number. Assign the number to a count."', () => {
+            const lexerResult = lexer.tokenize([
+                'Assign 1 to a number.',
+                'Assign the number to a count.'
+            ]);
+
+            const result = parser.parse(lexerResult.tokens);
+
+            expect(result).toBeTruthy();
+            expect(result).toHaveLength(2);
+        });
     });
 });
